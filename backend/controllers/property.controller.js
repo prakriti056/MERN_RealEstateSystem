@@ -470,30 +470,30 @@ export const getPropertyDetails = async (req,res) => {
         if(authHeader && authHeader.startsWith("Bearer")) {
             try{
                 const token = authHeader.split(" ")[1];
-                const decode = jwt.verify(token, process.env.JWT_SECRET);
-                visitorId = decodeURI.id;
+                const decoded = jwt.verify(token, process.env.JWT_SECRET);
+                visitorId = decoded.id;
             }
             catch (error) {
 
             }
         }
-        const isSellerChecking = visitorId === property.seller._id.toString();
-        // only increment the view if not seller but if he edit then increase the view
+        // only increment the view if not seller viewing their own property
+        const isSellerChecking = property.seller && visitorId === property.seller._id.toString();
         if (!isSellerChecking && !property.viewedBy.includes(visitorId)) {
             property.views += 1;
             property.viewedBy.push(visitorId);
             await property.save();
         }
 
-        const similarPropertys = await Property.find({
-            _id: { $me: property._id},
+        const similarProperties = await Property.find({
+            _id: { $ne: property._id},
             city: property.city,
             propertyType: property.propertyType,
             status: property.status
         })
 
         .limit(4)
-        .select("Title price images city area propertyType bhk areaSize status");
+        .select("title price images city area propertyType bhk areaSize status");
 
         res.json({
             success:true,

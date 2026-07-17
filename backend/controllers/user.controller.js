@@ -50,7 +50,7 @@ export const getPublicProfile = async (req, res) => {
 
 export const updateProfile = async (req, res) => {
     try {
-        const { name, phone, address, } = req.body;
+        const { name, phone, address, removeProfilePic } = req.body;
         const user = await User.findById(req.user._id);
         if (!user) {
             return res.status(404).json({

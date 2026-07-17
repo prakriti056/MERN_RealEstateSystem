@@ -1,7 +1,9 @@
 import express from 'express';
 import cors from 'cors';
 import bodyParser from 'body-parser';
-import 'dotenv/config';
+import dotenv from 'dotenv';
+import { fileURLToPath } from 'url';
+import path from 'path';
 import http from 'http';
 import { Server } from 'socket.io';
 import { connectDB } from './config/db.js';
@@ -18,13 +20,19 @@ import adminRouter from './routes/admin.routes.js';
 const app = express();
 const PORT = 5000;
 
+// Resolve .env from the backend directory regardless of CWD
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
+dotenv.config({ path: path.resolve(__dirname, '.env') });
+
 // DB
 connectDB();
 
 
 // Middleware
 const allowedOrigins = [
-    "http://localhost:5000/",
+    "http://localhost:5000",
+    "http://localhost:5173",
 ].filter(Boolean);
 app.use(cors({
     origin: function (origin, callback) {

@@ -1,13 +1,54 @@
 import React from 'react';
 import { Route, Routes } from "react-router-dom";
 import LandingPage from "./pages/shared/LandingPage";
+import Properties from "./pages/shared/Properties";
+import PropertyDetails from "./pages/shared/propertyDetails";
+import Login from "./pages/shared/auth/Login";
+import Register from "./pages/shared/auth/Register";
+import VerifyEmail from './pages/shared/auth/VerifyEmail';
+import ForgotPassword from './pages/shared/auth/ForgotPassword';
+import ResetPassword from './pages/shared/auth/ResetPassword';
+import Profile from './pages/shared/Profile';
+import Contact from './pages/shared/Contact';
+import AdminDashboard from './pages/admin/AdminDashboard';
+import AdminUsers from './pages/admin/AdminUsers';
+import AdminLayout from './components/AdminLayout';
+import SellerRequests from './pages/admin/SellerRequests';
+import AdminProperties from './pages/admin/AdminProperties';
+import AdminInquiries from './pages/admin/AdminInquiries';
+import AdminContacts from './pages/admin/AdminContacts';
 
 const App = () => {
   return (
     <div>
       <Routes>
+
+        <Route path="/register" element={<Register />} />
+        <Route path="/verify-email" element={<VerifyEmail />} />
+        <Route path="/login" element={<Login />} />
+        <Route path="/forgot-password" element={<ForgotPassword />} />
+        <Route path="/reset-password/:token" element={<ResetPassword />} />
+
+
         <Route path="/" element={<LandingPage/>} />
-        
+        <Route path="/properties" element={<Properties/>} />
+        <Route path="/properties/:id" element={<PropertyDetails/>} />
+
+        <Route path="/contact" element={<Contact/>} />
+        <Route path="/profile" element={<Profile/>} />
+
+
+        <Route element={<AdminLayout/>}>
+          <Route path="/admin-dashboard" element={<AdminDashboard/>} />
+           <Route path="/admin/users" element={<AdminUsers/>} />
+           <Route path="/admin/seller-requests" element={<SellerRequests/>} />
+            <Route path="/admin/properties" element={<AdminProperties/>} />
+            <Route path="/admin/inquiries" element={<AdminInquiries/>} />
+            <Route path="/admin/contacts" element={<AdminContacts/>} />
+
+
+        </Route>
+
       </Routes>
     </div>
   );

@@ -7,7 +7,7 @@ import upload from "../middlewares/upload.middleware.js";
 const userRouter = express.Router();
 
 userRouter.get("/profile", protect, getProfile);
-userRouter.put("/profile", protect, upload.single("profile"), updateProfile);
+userRouter.put("/profile", protect, upload.single("profilePic"), updateProfile);
 userRouter.get("/public/:id", getPublicProfile);
 
 export default userRouter;

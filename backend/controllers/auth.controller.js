@@ -16,7 +16,7 @@ export const register = async (req, res) => {
             });
         }
         const hashedPassword = await bcrypt.hash(password, 10);
-        const verificationToken = Math.floor(1000000 + Math.random() * 9000000).toString();
+        const verificationToken = Math.floor(100000 + Math.random() * 900000).toString();
         const user = await User.create({
             name,
             email,
@@ -172,8 +172,21 @@ export const verifyEmail = async (req, res) => {
             });
         }
 
-        // 4. Check verification code (IMPORTANT FIX)
-        if (!user.verificationToken || user.verificationToken !== String(code)) {
+        // 4. Check verification code
+        // Convert both to strings and trim to handle type mismatches and whitespace
+        const storedToken = String(user.verificationToken).trim();
+        const inputCode = String(code).trim();
+
+        console.log("Verification debug:", {
+            email,
+            storedToken,
+            inputCode,
+            storedType: typeof user.verificationToken,
+            inputType: typeof code,
+            match: storedToken === inputCode
+        });
+
+        if (!user.verificationToken || storedToken !== inputCode) {
             return res.status(400).json({
                 message: "Invalid verification code"
             });

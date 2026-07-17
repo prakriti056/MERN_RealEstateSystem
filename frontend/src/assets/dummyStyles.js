@@ -1017,7 +1017,7 @@ export const loginStyles = {
   input: "w-full py-3 px-4 rounded-lg border border-border outline-none focus:border-primary transition-colors",
   passwordHeader: "flex justify-between items-center mb-2",
   forgotLink: "text-sm text-primary font-medium hover:underline",
-  submitButton: "btn btn-primary p-3.5 text-base mt-2",
+  submitButton: "btn btn-primary p-4 text-lg font-bold mt-2 w-full",
   footerText: "text-center mt-8 text-text-muted",
   registerLink: "text-primary font-semibold hover:underline",
 };
@@ -1110,7 +1110,7 @@ export const adminSidebarStyles = {
 };
 
 export const dashboardNavbarStyles = {
-  header: "h-[64px] bg-white/70 backdrop-blur-[12px] border-b border-white/20 flex items-center px-4 sticky top-0 z-[900] w-full gap-4 md:hidden",
+  header: "h-[64px] bg-white/70 backdrop-blur-[12px] border-b border-white/20 flex items-center px-4 sticky top-0 z-[900] w-full gap-4",
   menuButton: "bg-primary/5 border-none text-primary cursor-pointer flex items-center justify-center w-10 h-10 rounded-xl shrink-0",
   logoContainer: "flex items-center overflow-hidden",
 };
@@ -1193,27 +1193,35 @@ export const logoStyles = {
 };
 
 export const navbarStyles = {
-  nav: "glass fixed top-0 w-full left-0 z-[1000] py-2 lg:py-4",
+  nav: "fixed top-0 w-full left-0 z-[1000] py-3 lg:py-3 transition-all duration-500 ease-in-out",
+  navDefault: "bg-transparent",
+  navScrolled: "glass shadow-[0_4px_20px_rgba(0,0,0,0.08)] py-2 lg:py-2",
   container: "container px-6 max-w-[1400px] mx-auto",
   grid: "grid grid-cols-[auto_1fr_auto] items-center gap-4",
-  desktopMenu: "hidden lg:flex justify-self-center items-center bg-white/50 px-3 py-1.5 rounded-full border border-white/30 gap-2 shadow-[0_4px_15px_rgba(0,0,0,0.05)]",
-  navLink: "nav-link text-text-main font-semibold text-[15px] px-4 py-2 rounded-3xl transition-all duration-300 no-underline hover:text-primary hover:bg-primary/10",
-  rightSection: "justify-self-end flex items-center gap-5",
-  userSection: "flex items-center gap-5",
-  avatar: "w-10 h-10 rounded-full border-2 border-primary-light object-cover",
-  logoutButton: "btn btn-outline hidden lg:flex py-1.5 px-4 rounded-xl font-semibold text-sm",
-  mobileToggle: "lg:hidden cursor-pointer text-text-main flex",
-  backdrop: (isOpen) => `fixed inset-0 w-full h-full bg-black/40 backdrop-blur-sm z-[2001] transition-all duration-300 ${isOpen ? 'opacity-100 visible' : 'opacity-0 invisible'}`,
-  drawer: (isOpen) => `fixed top-0 -left-[300px] w-[300px] h-full bg-white z-[2002] transition-transform duration-300 shadow-[10px_0_30px_rgba(0,0,0,0.1)] border-r border-border flex flex-col p-6 ${isOpen ? 'translate-x-[300px]' : ''}`,
+  desktopMenu: "hidden lg:flex justify-self-center items-center bg-white/60 backdrop-blur-[8px] px-2 py-1 rounded-2xl border border-white/40 gap-1 shadow-[0_4px_15px_rgba(0,0,0,0.04)]",
+  navLink: "nav-link text-text-main font-medium text-[14px] px-4 py-2 rounded-xl transition-all duration-300 no-underline relative",
+  navLinkHover: "hover:text-primary hover:bg-primary/8",
+  navLinkActive: "text-primary bg-primary-light font-semibold shadow-sm",
+  navLinkInactive: "text-text-muted/80",
+  rightSection: "justify-self-end flex items-center gap-4",
+  userSection: "flex items-center gap-4",
+  avatar: "w-9 h-9 rounded-full border-2 border-primary/30 object-cover transition-all duration-300 hover:border-primary hover:scale-105 shadow-sm",
+  logoutButton: "btn btn-outline hidden lg:flex py-1.5 px-4 rounded-xl font-semibold text-sm hover:bg-red-50 hover:text-red-500 hover:border-red-200",
+  mobileToggle: "lg:hidden cursor-pointer text-text-main flex items-center justify-center w-10 h-10 rounded-xl transition-all duration-300 hover:bg-primary/10 hover:text-primary",
+  backdrop: (isOpen) => `fixed inset-0 w-full h-full bg-black/30 backdrop-blur-sm z-[2001] transition-all duration-300 ${isOpen ? 'opacity-100 visible' : 'opacity-0 invisible pointer-events-none'}`,
+  drawer: (isOpen) => `fixed top-0 left-0 w-[310px] h-full bg-white z-[2002] transition-all duration-[400ms] ease-[cubic-bezier(0.4,0,0.2,1)] shadow-[10px_0_40px_rgba(0,0,0,0.12)] border-r border-border flex flex-col p-6 ${isOpen ? 'translate-x-0 opacity-100' : '-translate-x-full opacity-0'}`,
   drawerHeader: "flex justify-between items-center mb-10",
-  drawerCloseIcon: "cursor-pointer text-text-main",
-  drawerNavLinks: "flex flex-col gap-6 flex-1 text-lg",
+  drawerCloseButton: "cursor-pointer text-text-main flex items-center justify-center w-10 h-10 rounded-xl transition-all duration-200 hover:bg-red-50 hover:text-red-500",
+  drawerNavLinks: "flex flex-col gap-2 flex-1",
+  drawerNavLink: "flex items-center gap-3 px-4 py-3 rounded-xl text-[15px] font-medium transition-all duration-200 no-underline",
+  drawerNavLinkActive: "bg-primary-light text-primary font-semibold",
+  drawerNavLinkInactive: "text-text-muted hover:bg-gray-50 hover:text-text-main",
   drawerUserSection: "mt-auto pt-6 border-t border-border",
   drawerUserInfo: "flex items-center gap-4 mb-6",
-  drawerAvatar: "w-10 h-10 rounded-full object-cover",
+  drawerAvatar: "w-10 h-10 rounded-full object-cover ring-2 ring-primary/20",
   drawerUserName: "font-semibold text-[15px]",
-  drawerUserEmail: "text-xs text-text-muted",
-  drawerLogoutButton: "btn btn-primary w-full",
+  drawerUserEmail: "text-xs text-text-muted truncate",
+  drawerLogoutButton: "btn w-full py-3 rounded-xl font-semibold text-sm bg-red-50 text-red-500 hover:bg-red-100 hover:text-red-600 border border-red-100",
 };
 
 export const propertyCardStyles = {
@@ -1232,6 +1240,9 @@ export const propertyCardStyles = {
   wishlistButton: (isWishlisted) => `flex items-center justify-center w-8 h-8 rounded-full border-none cursor-pointer shadow-[0_2px_8px_rgba(0,0,0,0.1)] transition-all duration-200 z-[15] hover:text-red-500 hover:scale-110 hover:bg-white ${isWishlisted ? 'text-red-500 bg-white' : 'text-[#64748b] bg-white/90'}`,
   priceOverlay: "absolute bottom-0 left-0 right-0 pt-6 pb-3 px-4 bg-gradient-to-t from-black/70 to-transparent text-white",
   price: "text-[1.5rem] font-extrabold m-0",
+
+  // Placeholder when no image
+  imagePlaceholder: "w-full h-full flex flex-col items-center justify-center bg-[#f1f5f9] text-[#94a3b8] gap-2",
 
   // Content section
   content: "p-5 flex flex-col flex-1",

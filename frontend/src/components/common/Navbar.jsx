@@ -1,131 +1,110 @@
-import React, { useState } from "react";
+import React, { useState, useEffect, useCallback } from "react";
 import { navbarStyles as s } from '../../assets/dummyStyles';
 import Logo from './Logo';
 import { useAuth } from "../../context/AuthContext";
-import { Link } from "react-router-dom";
-import { HiMenuAlt1, HiMenuAlt3, HiX } from "react-icons/hi";
+import { Link, useLocation } from "react-router-dom";
+import { HiMenuAlt3, HiX, HiHome, HiOfficeBuilding, HiHeart, HiChatAlt2, HiPhone, HiArrowCircleRight, HiUser, HiViewGrid, HiShieldCheck } from "react-icons/hi";
 
 const Navbar = () => {
     const [isOpen, setIsOpen] = useState(false);
+    const [scrolled, setScrolled] = useState(false);
     const { user, logout } = useAuth();
+    const location = useLocation();
 
-    // to toggle the menu for mobile
-    const toggleMenu = () => setIsOpen(!isOpen);
+    // Scroll detection
+    useEffect(() => {
+        const handleScroll = () => {
+            setScrolled(window.scrollY > 30);
+        };
+        window.addEventListener("scroll", handleScroll, { passive: true });
+        handleScroll();
+        return () => window.removeEventListener("scroll", handleScroll);
+    }, []);
 
-    // navlinks
+    // Close drawer on route change
+    useEffect(() => {
+        setIsOpen(false);
+    }, [location.pathname]);
 
-    const navlinks = (
-        <>
-            {(!user || user.role !== "buyer") && (
-                <Link to="/properties"
-                    className={s.navlink}
-                    onClick={() => setIsOpen(false)}
-                >
-                    Browse Properties
-                </Link>
-            )}
+    // Lock body scroll when drawer is open
+    useEffect(() => {
+        if (isOpen) {
+            document.body.style.overflow = "hidden";
+        } else {
+            document.body.style.overflow = "";
+        }
+        return () => { document.body.style.overflow = ""; };
+    }, [isOpen]);
 
-            {user && user.role === "buyer" && (
-                <>
-                    <Link to='/' className={s.navlink} onClick={() => setIsOpen(false)}>
-                        Home
-                    </Link>
+    const toggleMenu = useCallback(() => setIsOpen((prev) => !prev), []);
+    const closeMenu = useCallback(() => setIsOpen(false), []);
 
-                    <Link to="/properties"
-                        className={s.navlink}
-                        onClick={() => setIsOpen(false)}
-                    >
-                        Property
-                    </Link>
-                    <Link
-                        to="/wishlist"
-                        className={s.navlink}
-                        onClick={() => setIsOpen(false)}
-                    >
-                        Wishlist
-                    </Link>
+    // Helper to get link class for desktop
+    const linkClass = (path) => {
+        const isActive = location.pathname === path;
+        return `${s.navLink} ${isActive ? s.navLinkActive : s.navLinkInactive} ${s.navLinkHover}`;
+    };
 
-                    <Link
-                        to="/chat-message"
-                        className={s.navlink}
-                        onClick={() => setIsOpen(false)}
-                    >
+    // Helper to get drawer link class
+    const drawerLinkClass = (path) => {
+        const isActive = location.pathname === path;
+        return `${s.drawerNavLink} ${isActive ? s.drawerNavLinkActive : s.drawerNavLinkInactive}`;
+    };
 
-                        Message
+    // Navigation links data
+    const navItems = [
+        { path: "/", label: "Home", icon: HiHome, showFor: "all" },
+        { path: "/properties", label: "Properties", icon: HiOfficeBuilding, showFor: "all" },
+        { path: "/wishlist", label: "Wishlist", icon: HiHeart, showFor: "buyer" },
+        { path: "/chat-message", label: "Messages", icon: HiChatAlt2, showFor: "buyer" },
+        { path: "/contact", label: "Contact", icon: HiPhone, showFor: "all" },
+        { path: "/dashboard", label: "Dashboard", icon: HiViewGrid, showFor: "seller" },
+        { path: "/admin-dashboard", label: "Admin Panel", icon: HiShieldCheck, showFor: "admin" },
+    ];
 
-                    </Link>
+    const getVisibleItems = () => {
+        if (!user) {
+            // Show public links when logged out
+            return navItems.filter(item => item.showFor === "all");
+        }
+        if (user.role === "buyer") {
+            return navItems.filter(item => item.showFor === "all" || item.showFor === "buyer");
+        }
+        if (user.role === "seller") {
+            return navItems.filter(item => item.showFor === "all" || item.showFor === "seller");
+        }
+        if (user.role === "admin") {
+            return navItems.filter(item => item.showFor === "all" || item.showFor === "admin");
+        }
+        return navItems.filter(item => item.showFor === "all");
+    };
 
-                    <Link
-                        to="/contact"
-                         className={s.navlink}
-                        onClick={() => setIsOpen(false)}
-                    >
-
-                        Contact Us
-                    </Link>
-                </>
-
-            )}
-            {!user && (
-                <>
-                    <Link
-                        to="/login"
-                        className={s.navlink}
-                        onClick={() => setIsOpen(false)}
-                    >
-                        Login
-                    </Link>
-
-                    <Link
-                        to="/register"
-                        className={s.navlink}
-                        onClick={() => setIsOpen(false)}
-                    >
-                        Register
-                    </Link>
-                </>
-            )}
-
-            {/* for seller */}
-            {user && user.role === "seller" && (
-                <>
-                    <Link
-                        to="/dashboard"
-                        className={s.navlink}
-                        onClick={() => setIsOpen(false)}
-                    >
-                        Dashboard
-                    </Link>
-                </>
-            )}
-
-            {/* for admin */}
-            {user && user.role === "admin" && (
-                <>
-                    <Link
-                        to="/admin-dashboard"
-                        className={s.navlink}
-                        onClick={() => setIsOpen(false)}
-                    >
-                        Admin Panel
-                    </Link>
-                </>
-            )}
-        </>
-    );
+    const visibleItems = getVisibleItems();
 
     return (
         <>
-            <nav className={s.nav}>
+            <nav className={`${s.nav} ${scrolled ? s.navScrolled : s.navDefault}`}>
                 <div className={s.container}>
                     <div className={s.grid}>
-                        <div className=" justify-self-start">
+                        {/* Logo */}
+                        <div className="justify-self-start">
                             <Logo />
-
                         </div>
-                        <div className={s.desktopMenu}>{navlinks}</div>
 
-                        {/* right side */}
+                        {/* Desktop Navigation */}
+                        <div className={s.desktopMenu}>
+                            {visibleItems.map((item) => (
+                                <Link
+                                    key={item.path}
+                                    to={item.path}
+                                    className={linkClass(item.path)}
+                                >
+                                    {item.label}
+                                </Link>
+                            ))}
+                        </div>
+
+                        {/* Right Section */}
                         <div className={s.rightSection}>
                             {user ? (
                                 <div className={s.userSection}>
@@ -133,67 +112,135 @@ const Navbar = () => {
                                         <img
                                             src={
                                                 user.profilePic ||
-                                                `https://ui-avatars.com/api/?name=${user.name}&background=0d6e59&color=fff`
+                                                `https://ui-avatars.com/api/?name=${user.name}&background=0d9488&color=fff`
                                             }
                                             alt="Profile"
-                                            className={s.avatar} />
+                                            className={s.avatar}
+                                            title={user.name}
+                                        />
                                     </Link>
-
                                     <button onClick={logout} className={s.logoutButton}>
+                                        <HiArrowCircleRight size={16} />
                                         Logout
                                     </button>
                                 </div>
-                            ) : null}
+                            ) : (
+                                <div className="hidden lg:flex items-center gap-2">
+                                    <Link
+                                        to="/login"
+                                        className="btn btn-outline py-2 px-5 text-sm font-semibold rounded-xl"
+                                    >
+                                        Login
+                                    </Link>
+                                    <Link
+                                        to="/register"
+                                        className="btn btn-primary py-2 px-5 text-sm font-semibold rounded-xl"
+                                    >
+                                       Register
+                                    </Link>
+                                </div>
+                            )}
 
-                            {/* mobile toggle */}
-
-                            <div className={s.mobileToggle} onClick={toggleMenu}>
-                                {isOpen ? <HiX size={28} /> : <HiMenuAlt3 size={28} />}
-                            </div>
-
+                            {/* Mobile Toggle */}
+                            <button
+                                className={s.mobileToggle}
+                                onClick={toggleMenu}
+                                aria-label={isOpen ? "Close menu" : "Open menu"}
+                            >
+                                <div className="relative w-5 h-5 flex items-center justify-center">
+                                    <HiMenuAlt3
+                                        size={22}
+                                        className={`absolute transition-all duration-300 ${
+                                            isOpen ? "opacity-0 rotate-90 scale-0" : "opacity-100 rotate-0 scale-100"
+                                        }`}
+                                    />
+                                    <HiX
+                                        size={22}
+                                        className={`absolute transition-all duration-300 ${
+                                            isOpen ? "opacity-100 rotate-0 scale-100" : "opacity-0 -rotate-90 scale-0"
+                                        }`}
+                                    />
+                                </div>
+                            </button>
                         </div>
-
                     </div>
                 </div>
             </nav>
 
+            {/* Mobile Drawer Backdrop */}
             <div
                 className={s.backdrop(isOpen)}
-                onClick={() => setIsOpen(false)}
-            ></div>
+                onClick={closeMenu}
+            />
 
+            {/* Mobile Drawer */}
             <div className={s.drawer(isOpen)}>
                 <div className={s.drawerHeader}>
-                    <Logo onClick={() => setIsOpen(false)} />
-
-                    <HiX 
-                    size={28}
-                        onClick={() => setIsOpen(false)}
-                        className={s.drawerHeader}
-                    />
-
+                    <Logo onClick={closeMenu} />
+                    <button
+                        onClick={closeMenu}
+                        className={s.drawerCloseButton}
+                        aria-label="Close menu"
+                    >
+                        <HiX size={24} />
+                    </button>
                 </div>
-                <div className={s.drawerNavLinks}>{navlinks}</div>
+
+                <div className={s.drawerNavLinks}>
+                    {visibleItems.map((item) => {
+                        const Icon = item.icon;
+                        return (
+                            <Link
+                                key={item.path}
+                                to={item.path}
+                                className={drawerLinkClass(item.path)}
+                            >
+                                <Icon size={20} />
+                                {item.label}
+                            </Link>
+                        );
+                    })}
+
+                    {/* Auth links in drawer when logged out */}
+                    {!user && (
+                        <>
+                            <div className="border-t border-border my-3 pt-3" />
+                            <Link
+                                to="/login"
+                                className={drawerLinkClass("/login")}
+                            >
+                                <HiArrowCircleRight size={20} />
+                                Sign In
+                            </Link>
+                            <Link
+                                to="/register"
+                                className={drawerLinkClass("/register")}
+                            >
+                                <HiUser size={20} />
+                                Get Started
+                            </Link>
+                        </>
+                    )}
+                </div>
 
                 {user && (
                     <div className={s.drawerUserSection}>
                         <div className={s.drawerUserInfo}>
-                            <img src={
-                                user.profilePic ||
-                                `https://ui-avatars.com/api/?name=${user.name}&background=0d6e59&color=fff`
-                            }
+                            <img
+                                src={
+                                    user.profilePic ||
+                                    `https://ui-avatars.com/api/?name=${user.name}&background=0d9488&color=fff`
+                                }
                                 alt="Profile"
                                 className={s.drawerAvatar}
                             />
-
-                            <div>
+                            <div className="min-w-0 flex-1">
                                 <div className={s.drawerUserName}>{user.name}</div>
                                 <div className={s.drawerUserEmail}>{user.email}</div>
-                               
                             </div>
                         </div>
-
                         <button onClick={logout} className={s.drawerLogoutButton}>
+                            <HiArrowCircleRight size={18} />
                             Logout
                         </button>
                     </div>

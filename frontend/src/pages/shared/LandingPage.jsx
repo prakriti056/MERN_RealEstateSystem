@@ -1,13 +1,15 @@
 import React, { useState, useEffect } from 'react';
 import { landingPageStyles as s } from '../../assets/dummyStyles';
 import Navbar from '../../components/common/Navbar';
-import { HiLocationMarker, HiSearch, HiHome, HiOfficeBuilding, HiShieldCheck, HiLightningBolt, HiCurrencyDollar, HiVideoCamera } from 'react-icons/hi';
+import { HiLocationMarker, HiSearch, HiHome, HiOfficeBuilding, HiShieldCheck, HiLightningBolt, HiCurrencyDollar, HiVideoCamera, HiMail, HiPhone } from 'react-icons/hi';
+import { FaFacebookF, FaTwitter, FaInstagram, FaLinkedinIn } from 'react-icons/fa';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
 import API_URL from '../../config';
 import axios from 'axios';
 import banner from '../../assets/bannerimage.png';
 import PropertyCard from '../../components/common/PropertyCard';
+import logo from '../../assets/hexagonlogo1.png';
 
 
 const LandingPage = () => {
@@ -28,29 +30,56 @@ const LandingPage = () => {
     });
     const [wishlistedIds, setWishlistedIds] = useState([]);
 
-    // to fetch properties
-    const fetchProperties = async (search = "") => {
-        try {
-            setLoading(true);
-            const res = await axios.get(`${API_URL}/api/property?city=${search}`);
-            setProperties(res.data.properties || res.data || []);
-            setError(null);
-        } catch (err) {
-            setError("Failed to load properties. please try again");
-        } finally {
-            setLoading(false);
+    // to fetch properties with retry logic
+    const fetchProperties = async (search = "", retries = 2) => {
+        setLoading(true);
+        let lastError = null;
+        for (let attempt = 1; attempt <= retries + 1; attempt++) {
+            try {
+                const res = await axios.get(`${API_URL}/api/property?city=${search}`, {
+                    timeout: 10000,
+                });
+                setProperties(res.data.properties || res.data || []);
+                setError(null);
+                setLoading(false);
+                return;
+            } catch (err) {
+                lastError = err;
+                if (attempt <= retries) {
+                    // Wait before retrying (exponential backoff 1s, 2s, ...)
+                    await new Promise(r => setTimeout(r, 1000 * attempt));
+                }
+            }
+        }
+        // All retries exhausted - set the appropriate error
+        setLoading(false);
+        if (lastError.code === 'ERR_NETWORK' || !lastError.response) {
+            setError("Unable to connect to server. Please make sure the backend server is running on port 5000.");
+        } else if (lastError.code === 'ECONNABORTED') {
+            setError("Request timed out. Please check your connection and try again.");
+        } else {
+            setError(lastError.response?.data?.message || "Failed to load properties. Please try again.");
         }
     };
 
-    // to fetch counts
-    const fetchCounts = async () => {
-        try {
-            const res = await axios.get(`${API_URL}/api/property/counts`);
-            if (res.data.success) {
-                setPropertyCounts(res.data.counts);
+    // to fetch counts with retry
+    const fetchCounts = async (retries = 2) => {
+        for (let attempt = 1; attempt <= retries + 1; attempt++) {
+            try {
+                const res = await axios.get(`${API_URL}/api/property/counts`, {
+                    timeout: 8000,
+                });
+                if (res.data.success) {
+                    setPropertyCounts(res.data.counts);
+                }
+                return;
+            } catch (err) {
+                if (attempt <= retries) {
+                    await new Promise(r => setTimeout(r, 500 * attempt));
+                } else {
+                    console.error("Failed to fetch property counts:", err);
+                }
             }
-        } catch (err) {
-            console.error("Failed to fetch property counts:", err);
         }
     };
 
@@ -274,6 +303,7 @@ const LandingPage = () => {
                     <div className={s.categoryGrid}>
                         {categories.map((cat, idx) => (
                             <div
+                                key={idx}
                                 className={s.categoryCard}
                                 onClick={() => navigate(`/properties?type=${cat.type}`)}
                             >
@@ -319,17 +349,17 @@ const LandingPage = () => {
                         </p>
 
                         <ul className={s.featuresListItems}>
-                        {[
-                "Direct connection with certified agents",
-                "Real-time market valuation data",
-                "Secure document management system",
-                "24/7 Premium customer support",
-              ].map((item, idx) => (
-                <li key={idx} className={s.listItem}>
-                    <HiLightningBolt className="text-primary" />{item}
-                </li>
-             
-              ))}
+                            {[
+                                "Direct connection with certified agents",
+                                "Real-time market valuation data",
+                                "Secure document management system",
+                                "24/7 Premium customer support",
+                            ].map((item, idx) => (
+                                <li key={idx} className={s.listItem}>
+                                    <HiLightningBolt className="text-primary" />{item}
+                                </li>
+
+                            ))}
                         </ul>
                         <a href="#process" className={s.learnMoreLink}>
                             Learn more about our process &rarr;
@@ -339,7 +369,7 @@ const LandingPage = () => {
             </section>
 
             {/*  how it works */}
-              <section id="process" className={s.processSection}>
+            <section id="process" className={s.processSection}>
                 <div className={s.container}>
                     <div className={s.processHeader}>
                         <span className={s.processBadge}>How It Works</span>
@@ -347,46 +377,46 @@ const LandingPage = () => {
                             Our Seamless <span className={s.textGradient}>Process</span>
                         </h2>
                         <p className={s.processSubtitle}>
-                        We've simplified the journey of finding your drem home into three clear,
-                        stress-free steps.
+                            We've simplified the journey of finding your drem home into three clear,
+                            stress-free steps.
                         </p>
                     </div>
                     <div className={s.processGrid}>
 
-                                {[
-              {
-                step: "01",
-                title: "Smart Search",
-                desc: "Leverage our AI-driven Smart Search algorithms to find the best property matches tailored to your specific preferences.",
-                icon: <HiLightningBolt size={32} />,
-              },
-              {
-                step: "02",
-                title: "Virtual Tours",
-                desc: "Experience your future home from anywhere with our high-definition 3D virtual tours and immersive walkthroughs.",
-                icon: <HiVideoCamera size={32} />,
-              },
-              {
-                step: "03",
-                title: "Verified Trust",
-                desc: "Every listing is strictly audited for ownership and condition, ensuring your peace of mind and a secure transaction.",
-                icon: <HiShieldCheck size={32} />,
-              },
-            ].map((p, idx) => (
-                    <div key={idx} className={s.processCard}>
-                        <div className={s.stepNumber}>{p.step}</div>
-                         <div className={s.processIconWrapper}>{p.icon}</div>
-                         <h3 className={s.processCardTitle}>{p.title}</h3>
-                         <p className={s.processCardDesc}>{p.desc}</p>
-                    </div>
-            ))}
+                        {[
+                            {
+                                step: "01",
+                                title: "Smart Search",
+                                desc: "Leverage our AI-driven Smart Search algorithms to find the best property matches tailored to your specific preferences.",
+                                icon: <HiLightningBolt size={32} />,
+                            },
+                            {
+                                step: "02",
+                                title: "Virtual Tours",
+                                desc: "Experience your future home from anywhere with our high-definition 3D virtual tours and immersive walkthroughs.",
+                                icon: <HiVideoCamera size={32} />,
+                            },
+                            {
+                                step: "03",
+                                title: "Verified Trust",
+                                desc: "Every listing is strictly audited for ownership and condition, ensuring your peace of mind and a secure transaction.",
+                                icon: <HiShieldCheck size={32} />,
+                            },
+                        ].map((p, idx) => (
+                            <div key={idx} className={s.processCard}>
+                                <div className={s.stepNumber}>{p.step}</div>
+                                <div className={s.processIconWrapper}>{p.icon}</div>
+                                <h3 className={s.processCardTitle}>{p.title}</h3>
+                                <p className={s.processCardDesc}>{p.desc}</p>
+                            </div>
+                        ))}
 
                     </div>
                 </div>
-              </section>
+            </section>
 
-              {/* feature collection */}
-              <section className={s.featuredSection}>
+            {/* feature collection */}
+            <section className={s.featuredSection}>
                 <div className={s.container}>
                     <div className={s.featuredHeader}>
                         <span className={s.featuredBadge}>Handpicked for you</span>
@@ -403,30 +433,160 @@ const LandingPage = () => {
                             <div className={s.loader}></div>
                         </div>
                     ) : error ? (
-                        <div className={s.errorContainer}> 
+                        <div className={s.errorContainer}>
                             <p>{error}</p>
                         </div>
                     ) : (
-                        <div className={s.propertiesGrid}> 
+                        <div className={s.propertiesGrid}>
                             {properties
-                .filter((p) => p)
-                .sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt))
-                .slice(0, 6)
-                .map((property) => (
-                  <PropertyCard
-                    key={property._id}
-                    property={property}
-                    isWishlisted={wishlistedIds.includes(String(property._id))}
-                    onToggleWishlist={handleToggleWishlist}
-                  />
-                ))}
+                                .filter((p) => p)
+                                .sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt))
+                                .slice(0, 6)
+                                .map((property) => (
+                                    <PropertyCard
+                                        key={property._id}
+                                        property={property}
+                                        isWishlisted={wishlistedIds.includes(String(property._id))}
+                                        onToggleWishlist={handleTogglewishlist}
+                                    />
+                                ))}
 
                         </div>
                     )}
+
+                    <div className={s.discoverButtonContainer}>
+                        <button
+                            onClick={() =>
+                                navigate("/properties")}
+                            className={s.discoverButton}>
+                            Discover More Properties
+                        </button>
+                    </div>
                 </div>
-              </section>
+            </section>
+
+            {/* footer */}
+            <footer className={s.footer}>
+                <div className={s.container}>
+                    <div className={s.footerMainGrid}>
+                        <div className={s.footerBrand}>
+                            <div className={s.footerLogo}>
+                                <div className={s.logoIcon}>RE</div>
+                                RealEstate
+                            </div>
+                            <p className={s.brandDesc}>
+                                The most trusted platform for buying, selling, and
+                                renting premium real estate globally. we make property hunting seamless.
+                            </p>
+
+                            <div className={s.socialIcons}>
+
+                                {[FaFacebookF, FaTwitter, FaInstagram, FaLinkedinIn].map(
+                                    (Icon, idx) => (
+                                        <a href='#' key={idx} className={s.socialIcon}>
+                                            <Icon size={16} />
+                                        </a>
+                                    ),
+                                )}
+                            </div>
+                        </div>
+
+                        {/* Column 2: Quick Links */}
+                        <div>
+                            <h4 className={s.footerHeading}>Company</h4>
+                            <ul className={s.footerLinks}>
+                                <li>
+                                    <a href="/" className={s.footerLink}>
+                                        Home
+                                    </a>
+                                </li>
+                                <li>
+                                    <a href="/properties" className={s.footerLink}>
+                                        Property
+                                    </a>
+                                </li>
+                                <li>
+                                    <a href="/wishlist" className={s.footerLink}>
+                                        Wishlist
+                                    </a>
+                                </li>
+                                <li>
+                                    <a href="/contact" className={s.footerLink}>
+                                        Contact
+                                    </a>
+                                </li>
+                            </ul>
+                        </div>
+
+                        {/* Column 3: Contact Info */}
+                        <div>
+                            <h4 className={s.footerHeading}>Support</h4>
+                            <ul className={s.footerLinks}>
+                                <li className={s.contactInfo}>
+                                    <HiMail className="text-primary text-xl" />{" "}
+                                    contact@reestate.com
+                                </li>
+                                <li className={s.contactInfo}>
+                                    <HiPhone className="text-primary text-xl" /> +91 1234567890
+                                </li>
+                                <li className={s.contactInfoStart}>
+                                    <HiLocationMarker
+                                        className={`text-primary ${s.contactIcon}`}
+                                    />
+                                    123 Business Hub, India
+                                </li>
+                            </ul>
+                        </div>
+
+                        {/* Column 4: Newsletter */}
+                        <div>
+                            <h4 className={s.footerHeading}>Newsletter</h4>
+                            <p className={s.newsletterDesc}>
+                                Subscribe to get the latest listing and market insights directly in your inbox.
+                            </p>
+                            <div className={s.newsletterInputWrapper}>
+                                <input
+                                    type="email"
+                                    placeholder="Enter your email"
+                                    className={s.newsletterInput}
+                                />
+                                <button className={s.newsletterButton}>Join</button>
+                            </div>
+                        </div>
+                    </div>
+
+                    {/* bottom Bar*/}
+                    <div className={s.bottomBar}>
+                        <div className={s.bottomBarFlex}>
+                            <p>
+                                &copy; {new Date().getFullYear()} RealEstate. All rights reserved.
+                            </p>
+                            <div className={s.footerLegalLinks}>
+                                <a href="#" className={s.footerLink}>
+                                    Privacy Policy
+                                </a>
+                                <a href="#" className={s.footerLink}>
+                                    Terms of Service
+                                </a>
+                                <a href="#" className={s.footerLink}>
+                                    Cookies Settings
+                                </a>
+
+                            </div>
+                            </div>
+
+                            <div className={s.designCredit}>
+                                <img src={logo} alt="Logo" className={s.designLogo} />
+                                <span className="text-text-muted">Designed By</span>
+
+                               <span className={s.textGradient}>Prakriti Mishra</span>
+                            </div>
+
+                        </div>
+                    </div>
+            </footer>
         </div>
-    )
-}
+    );
+};
 
 export default LandingPage;
