@@ -1,7 +1,9 @@
 import React, { useEffect, useState } from "react";
 import { adminContactsStyles as s } from "../../assets/dummyStyles";
 import { useAuth } from "../../context/AuthContext";
-import { HiOutlineClock } from "react-icons/hi";
+import { HiOutlineClock, HiOutlineMail, HiOutlinePhone } from "react-icons/hi";
+import axios from "axios";
+import API_URL from "../../config";
 
 const AdminContacts = () => {
 
@@ -33,7 +35,7 @@ const AdminContacts = () => {
     if (loading)
         return (
             <div className="loader-full-page">
-                <div className={loader}></div>
+                <div className="loader"></div>
             </div>
         )
 
@@ -90,7 +92,7 @@ const AdminContacts = () => {
 
                                                     <div className={s.detailItem}>
                                                         <HiOutlineClock size={16} />{" "}
-                                                        {new Data(contact.createdAt).toLocaleString([], {
+                                                        {new Date(contact.createdAt).toLocaleString([], {
                                                             dateStyle: "medium",
                                                             timeStyle: "short",
                                                         })}

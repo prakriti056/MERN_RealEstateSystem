@@ -129,7 +129,7 @@ const PropertyDetails = () => {
         },
         { headers: { Authorization: `Bearer ${token}` } },
       );
-      navigate("/chat-message", { state: { chat } });
+      navigate("/chat-messages", { state: { chat } });
     } catch (err) {
       console.error("Error starting chat:", err);
       alert("Failed to start chat.");

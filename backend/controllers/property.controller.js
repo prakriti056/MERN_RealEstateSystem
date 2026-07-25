@@ -12,8 +12,7 @@ export const addProperty = async (req, res) => {
         let imageUrls = [];
         if (req.files && req.files.length > 0) {
             for (const file of req.files) {
-                const imageUrl = `${req.protocol}://${req.get('host')}/uploads/${file.filename}`;
-                const result = await uploadCloudinary(file.buffer);
+                const result = await uploadToCloudinary(file.buffer, "properties");
                 imageUrls.push(result.secure_url);
             }
         }
@@ -517,12 +516,12 @@ export const getSellerDashboard = async (req,res) => {
         const totalProperties = await Property.countDocuments({seller:sellerId});
         const activeListings = await Property.countDocuments({
             seller: sellerId,
-            status:"sold"
+            status: { $ne: "sold" }
         });
 
         const soldProperties = await Property.countDocuments({
-            seller:sellerId,
-            ststus:"sold"
+            seller: sellerId,
+            status: "sold"
         });
         const totalInquiries = await Inquiry.countDocuments({ seller: sellerId});
 

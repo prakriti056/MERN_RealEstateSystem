@@ -16,11 +16,11 @@ const SellerRequests = () => {
     useEffect(() => {
         const fetchRequests = async () => {
             try {
-                const res = await axios.get(`${API_URL}/api/admin/pending-seller`, {
+                const res = await axios.get(`${API_URL}/api/admin/pending-sellers`, {
                     headers: { Authorization: `Bearer ${token}` },
                 });
                 if (res.data.success) {
-                    setRequests(res.data.pendingSeller);
+                    setRequests(res.data.pendingSellers || []);
                 }
                 setLoading(false);
             } catch (err) {
@@ -35,7 +35,7 @@ const SellerRequests = () => {
     const handleApprove = async (id) => {
         try {
             const res = await axios.patch(
-                `${API_URL}/api/admin/approve-seller/${id}`,
+                `${API_URL}/api/admin/approve-sellers/${id}`,
                 {},
                 { headers: { Authorization: `Bearer ${token}` } },
             );
@@ -45,7 +45,7 @@ const SellerRequests = () => {
                 alert("Seller Approved SuccessFully!");
             }
         } catch (err) {
-            alter("Failed to approve a seller");
+            alert("Failed to approve a seller");
         }
     };
 

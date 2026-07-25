@@ -13,7 +13,7 @@ chatRouter.post("/start", async (req, res) => {
         let buyerId, finalSellerId;
         if (req.user.role === "seller") {
             buyerId = providedBuyerId;
-            finalSellerId = req.user._Id;
+            finalSellerId = req.user._id;
         } else {
             buyerId = req.user._id;
             finalSellerId = sellerId;

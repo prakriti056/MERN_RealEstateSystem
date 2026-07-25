@@ -45,11 +45,36 @@ export const getSellerInquiries = async (req, res) => {
             seller: req.user._id
 
         })
-            .populate("buyer", "name the email phone")
+            .populate("buyer", "name email phone")
             .populate("property", "title price image city")
-            .sort({ createAt: -1 });
+            .sort({ createdAt: -1 });
 
         res.status(201).json({
+            success: true,
+            count: inquiries.length,
+            inquiries
+        });
+    }
+    catch (error) {
+        res.status(500).json({
+            success: false,
+            message: error.message
+        });
+    }
+}
+
+// buyer view their own inquiries
+
+export const getBuyerInquiries = async (req, res) => {
+    try {
+        const inquiries = await Inquiry.find({
+            buyer: req.user._id
+        })
+            .populate("seller", "name email phone")
+            .populate("property", "title price images city")
+            .sort({ createdAt: -1 });
+
+        res.status(200).json({
             success: true,
             count: inquiries.length,
             inquiries

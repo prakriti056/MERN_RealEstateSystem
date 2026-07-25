@@ -19,8 +19,8 @@ const messageSchema = new mongoose.Schema({
 
 // chat  schema
 
-const chartSchema = new mongoose.Schema({
-    Property:{
+const chatSchema = new mongoose.Schema({
+    property:{
         type: mongoose.Schema.Types.ObjectId,
         ref: "Property",
         required: false
@@ -37,12 +37,12 @@ const chartSchema = new mongoose.Schema({
         ref: "User",
         required: true
     },
-    message: [messageSchema],
+    messages: [messageSchema],
 
 
 },{
     timestamps: true
 });
 
-const Chat = mongoose.model("chat", chartSchema);
+const Chat = mongoose.model("chat", chatSchema);
 export default Chat;

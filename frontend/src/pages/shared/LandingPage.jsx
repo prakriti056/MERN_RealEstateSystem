@@ -510,11 +510,7 @@ const LandingPage = () => {
                                         Wishlist
                                     </a>
                                 </li>
-                                <li>
-                                    <a href="/contact" className={s.footerLink}>
-                                        Contact
-                                    </a>
-                                </li>
+
                             </ul>
                         </div>
 

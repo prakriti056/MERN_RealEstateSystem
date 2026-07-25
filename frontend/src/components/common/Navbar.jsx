@@ -3,7 +3,7 @@ import { navbarStyles as s } from '../../assets/dummyStyles';
 import Logo from './Logo';
 import { useAuth } from "../../context/AuthContext";
 import { Link, useLocation } from "react-router-dom";
-import { HiMenuAlt3, HiX, HiHome, HiOfficeBuilding, HiHeart, HiChatAlt2, HiPhone, HiArrowCircleRight, HiUser, HiViewGrid, HiShieldCheck } from "react-icons/hi";
+import { HiMenuAlt3, HiX, HiHome, HiOfficeBuilding, HiHeart, HiChatAlt2, HiArrowCircleRight, HiUser, HiViewGrid, HiShieldCheck, HiPhone } from "react-icons/hi";
 
 const Navbar = () => {
     const [isOpen, setIsOpen] = useState(false);
@@ -56,8 +56,9 @@ const Navbar = () => {
         { path: "/", label: "Home", icon: HiHome, showFor: "all" },
         { path: "/properties", label: "Properties", icon: HiOfficeBuilding, showFor: "all" },
         { path: "/wishlist", label: "Wishlist", icon: HiHeart, showFor: "buyer" },
-        { path: "/chat-message", label: "Messages", icon: HiChatAlt2, showFor: "buyer" },
+        { path: "/chat-messages", label: "Messages", icon: HiChatAlt2, showFor: "buyer" },
         { path: "/contact", label: "Contact", icon: HiPhone, showFor: "all" },
+        
         { path: "/dashboard", label: "Dashboard", icon: HiViewGrid, showFor: "seller" },
         { path: "/admin-dashboard", label: "Admin Panel", icon: HiShieldCheck, showFor: "admin" },
     ];
@@ -136,7 +137,7 @@ const Navbar = () => {
                                         to="/register"
                                         className="btn btn-primary py-2 px-5 text-sm font-semibold rounded-xl"
                                     >
-                                       Register
+                                        Register
                                     </Link>
                                 </div>
                             )}
@@ -150,15 +151,13 @@ const Navbar = () => {
                                 <div className="relative w-5 h-5 flex items-center justify-center">
                                     <HiMenuAlt3
                                         size={22}
-                                        className={`absolute transition-all duration-300 ${
-                                            isOpen ? "opacity-0 rotate-90 scale-0" : "opacity-100 rotate-0 scale-100"
-                                        }`}
+                                        className={`absolute transition-all duration-300 ${isOpen ? "opacity-0 rotate-90 scale-0" : "opacity-100 rotate-0 scale-100"
+                                            }`}
                                     />
                                     <HiX
                                         size={22}
-                                        className={`absolute transition-all duration-300 ${
-                                            isOpen ? "opacity-100 rotate-0 scale-100" : "opacity-0 -rotate-90 scale-0"
-                                        }`}
+                                        className={`absolute transition-all duration-300 ${isOpen ? "opacity-100 rotate-0 scale-100" : "opacity-0 -rotate-90 scale-0"
+                                            }`}
                                     />
                                 </div>
                             </button>
