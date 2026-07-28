@@ -166,8 +166,11 @@ const corsOptions = {
     allowedHeaders: ["Content-Type", "Authorization", "X-Requested-With"]
 };
 
-// Apply CORS to all routes (handles OPTIONS preflight automatically)
+// Apply CORS to all routes
 app.use(cors(corsOptions));
+
+// Explicitly handle OPTIONS preflight requests (belt-and-suspenders)
+app.options('*', cors(corsOptions));
 
 app.use(bodyParser.json());
 
@@ -183,6 +186,18 @@ app.use("/api/admin", adminRouter);
 
 app.get("/", (req, res) => {
     res.send("API WORKING");
+});
+
+// CORS error handler — return JSON instead of HTML when cors rejects
+app.use((err, req, res, next) => {
+    if (err.message === "Not allowed by CORS") {
+        return res.status(403).json({
+            message: "CORS not allowed",
+            origin: req.headers.origin || "unknown",
+            hint: "Add your Vercel URL as CORS_ORIGIN env var on Render"
+        });
+    }
+    next(err);
 });
 
 const server = http.createServer(app);
