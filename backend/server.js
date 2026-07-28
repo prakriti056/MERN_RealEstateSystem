@@ -137,24 +137,37 @@ const allowedOrigins = [
     "https://mern-real-estate-system.vercel.app",
     "http://localhost:5000",
     "http://localhost:5173",
+    // Allow custom origin from env var (set on Render to your Vercel URL)
+    ...(process.env.CORS_ORIGIN ? [process.env.CORS_ORIGIN] : []),
 ].filter(Boolean);
 
 const corsOptions = {
     origin: function (origin, callback) {
-        if (!origin || allowedOrigins.includes(origin)) {
-            callback(null, true);
-        } else {
-            callback(new Error("Not allowed by CORS"));
+        // Allow requests with no origin (mobile apps, curl, etc)
+        if (!origin) {
+            return callback(null, true);
         }
+        // Allow if in the list
+        if (allowedOrigins.includes(origin)) {
+            return callback(null, true);
+        }
+        // Allow any *.vercel.app domain (for dynamic Vercel deployment URLs)
+        if (origin.endsWith('.vercel.app')) {
+            return callback(null, true);
+        }
+        // Allow any *.onrender.com domain
+        if (origin.endsWith('.onrender.com')) {
+            return callback(null, true);
+        }
+        callback(new Error("Not allowed by CORS"));
     },
     credentials: true,
     methods: ["GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS"],
     allowedHeaders: ["Content-Type", "Authorization", "X-Requested-With"]
 };
 
-// Apply CORS to all routes and handle preflight requests
+// Apply CORS to all routes (handles OPTIONS preflight automatically)
 app.use(cors(corsOptions));
-app.options('*', cors(corsOptions));
 
 app.use(bodyParser.json());
 
@@ -177,7 +190,13 @@ const server = http.createServer(app);
 // Socket.io setup
 const io = new Server(server, {
     cors: {
-        origin: allowedOrigins,
+        origin: function (origin, callback) {
+            if (!origin) return callback(null, true);
+            if (allowedOrigins.includes(origin)) return callback(null, true);
+            if (origin.endsWith('.vercel.app')) return callback(null, true);
+            if (origin.endsWith('.onrender.com')) return callback(null, true);
+            callback(new Error("Not allowed by CORS"));
+        },
         methods: ["GET", "POST"],
         credentials: true
     },
