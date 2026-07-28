@@ -132,13 +132,18 @@ dotenv.config({ path: path.resolve(__dirname, '.env') });
 connectDB();
 
 // Middleware
+// Normalize origin by stripping trailing slash
+const normalizeOrigin = (origin) => origin.replace(/\/+$/, '');
+
 const allowedOrigins = [
     "https://mern-real-estate-system-kppsb9ovn-group-1-3645.vercel.app",
+    "https://mern-real-estate-system-d82a832ml-group-1-3645.vercel.app",
     "https://mern-real-estate-system.vercel.app",
     "http://localhost:5000",
     "http://localhost:5173",
     // Allow custom origin from env var (set on Render to your Vercel URL)
-    ...(process.env.CORS_ORIGIN ? [process.env.CORS_ORIGIN] : []),
+    // Normalize to strip any trailing slash
+    ...(process.env.CORS_ORIGIN ? [normalizeOrigin(process.env.CORS_ORIGIN)] : []),
 ].filter(Boolean);
 
 const corsOptions = {
@@ -147,16 +152,18 @@ const corsOptions = {
         if (!origin) {
             return callback(null, true);
         }
+        // Strip trailing slash for consistent comparison
+        const normalized = normalizeOrigin(origin);
         // Allow if in the list
-        if (allowedOrigins.includes(origin)) {
+        if (allowedOrigins.includes(normalized)) {
             return callback(null, true);
         }
         // Allow any *.vercel.app domain (for dynamic Vercel deployment URLs)
-        if (origin.endsWith('.vercel.app')) {
+        if (normalized.endsWith('.vercel.app')) {
             return callback(null, true);
         }
         // Allow any *.onrender.com domain
-        if (origin.endsWith('.onrender.com')) {
+        if (normalized.endsWith('.onrender.com')) {
             return callback(null, true);
         }
         callback(new Error("Not allowed by CORS"));
@@ -207,9 +214,10 @@ const io = new Server(server, {
     cors: {
         origin: function (origin, callback) {
             if (!origin) return callback(null, true);
-            if (allowedOrigins.includes(origin)) return callback(null, true);
-            if (origin.endsWith('.vercel.app')) return callback(null, true);
-            if (origin.endsWith('.onrender.com')) return callback(null, true);
+            const normalized = normalizeOrigin(origin);
+            if (allowedOrigins.includes(normalized)) return callback(null, true);
+            if (normalized.endsWith('.vercel.app')) return callback(null, true);
+            if (normalized.endsWith('.onrender.com')) return callback(null, true);
             callback(new Error("Not allowed by CORS"));
         },
         methods: ["GET", "POST"],
